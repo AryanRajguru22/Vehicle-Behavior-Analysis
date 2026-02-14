@@ -6,11 +6,20 @@ from modules.tracker import TrackerMemory
 from modules.speed_estimator import SpeedEstimator
 from modules.jam_detector import JamDetector
 from modules.vehicle_counter import VehicleCounter
+from modules.wrong_side_detector import WrongSideDetector
+
+
+# ============================================================
+# INITIALIZE WRONG SIDE DETECTOR
+# ============================================================
+
+wrong_side_detector = WrongSideDetector(ALLOWED_DIRECTION)
 
 
 # ============================================================
 # YOUTUBE STREAM
 # ============================================================
+
 def get_youtube_stream(url):
     ydl_opts = {
         'format': 'bestvideo[ext=mp4]+bestaudio/best[ext=mp4]/best',
@@ -24,14 +33,12 @@ def get_youtube_stream(url):
         if "url" in info:
             return info["url"]
 
-        # If live stream
         if "formats" in info:
             for f in info["formats"]:
                 if f.get("ext") == "mp4" and f.get("vcodec") != "none":
                     return f["url"]
 
         raise Exception("Could not extract stream URL")
-
 
 
 # ============================================================
@@ -72,7 +79,6 @@ tracker = TrackerMemory()
 speed_estimator = SpeedEstimator()
 jam_detector = JamDetector()
 counter = VehicleCounter()
-
 
 cv2.namedWindow("Traffic AI", cv2.WINDOW_NORMAL)
 cv2.resizeWindow("Traffic AI", DISPLAY_WIDTH, DISPLAY_HEIGHT)
@@ -118,45 +124,87 @@ while True:
 
             is_person = (cls == 0)
 
-
             track_id = int(box.id[0])
 
             x1, y1, x2, y2 = map(int, box.xyxy[0])
             center_x = (x1 + x2) // 2
             center_y = (y1 + y2) // 2
 
-            # Add to counter with lane classification
+            # ============================================================
+            # WRONG SIDE DETECTION (BEFORE SPEED UPDATE)
+            # ============================================================
+
+            prev_data = tracker.get_previous(track_id)
+            wrong_side = False
+
+            if prev_data is not None:
+                prev_x, prev_y, _ = prev_data
+                wrong_side = wrong_side_detector.check(track_id, prev_x, center_x)
+
+            # ============================================================
+            # VEHICLE COUNT
+            # ============================================================
+
             counter.add(track_id, center_y, frame_height)
             total_vehicles += 1
 
-            # ================= SPEED =================
+            # ============================================================
+            # SPEED ESTIMATION
+            # ============================================================
+
             if not is_person:
                 speed = speed_estimator.calculate(track_id, center_x, center_y, tracker)
                 speed = tracker.smooth_speed(track_id, speed)
             else:
                 speed = 0
+
             if speed < JAM_SPEED_THRESHOLD:
                 slow_count += 1
 
-            # ================= COLOR LOGIC =================
-            color = (0, 255, 0)
-            if speed > SPEED_LIMIT:
-                color = (0, 0, 255)
+            # ============================================================
+            # COLOR LOGIC
+            # ============================================================
 
-            # ================= DRAW =================
+            color = (0, 255, 0)  # normal
+
+            if speed > SPEED_LIMIT:
+                color = (0, 0, 255)  # speed violation
+
+            if wrong_side:
+                color = (255, 0, 0)  # wrong side violation
+
+            # ============================================================
+            # DRAW BOX
+            # ============================================================
+
             cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
 
-            cv2.putText(
-                frame,
-                f"{int(speed)} km/h",
-                (x1, y1 - 20),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                0.6,
-                color,
-                2
-            )
+            if not is_person:
+                cv2.putText(
+                    frame,
+                    f"{int(speed)} km/h",
+                    (x1, y1 - 20),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.6,
+                    color,
+                    2
+                )
 
-    # ================= JAM DETECTION =================
+            if wrong_side:
+                cv2.putText(
+                    frame,
+                    "WRONG SIDE",
+                    (x1, y2 + 20),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.6,
+                    (255, 0, 0),
+                    2
+                )
+
+    # ============================================================
+    # JAM DETECTION
+    # ============================================================
+
     if jam_detector.check(total_vehicles, slow_count):
         cv2.putText(
             frame,
@@ -168,7 +216,10 @@ while True:
             3
         )
 
-    # ================= DISPLAY INFO =================
+    # ============================================================
+    # DISPLAY INFO
+    # ============================================================
+
     lane_counts = counter.lane_count()
 
     cv2.putText(
@@ -193,7 +244,6 @@ while True:
 
     cv2.imshow("Traffic AI", frame)
 
-    # Cleanup old tracking IDs (important for long CCTV use)
     tracker.cleanup()
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
