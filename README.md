@@ -192,7 +192,7 @@ Semester 4 – Mini Project Evaluation (MTE)
 👨‍💻 Author
 
 Aryan Rajguru
-Computer Engineering
+B. Tech. Computer Science and Engineering
 
 GitHub:
 https://github.com/AryanRajguru22
