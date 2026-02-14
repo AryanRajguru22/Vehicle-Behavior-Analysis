@@ -2,9 +2,9 @@
 # SOURCE CONFIG
 # ===============================
 
-SOURCE_TYPE = "youtube"   # video | youtube | rtsp | webcam
+SOURCE_TYPE = "video"   # video | youtube | rtsp | webcam
 
-VIDEO_PATH = "traffic.mp4"
+VIDEO_PATH = "Dhurandhar.mp4"
 YOUTUBE_URL = "https://www.youtube.com/watch?v=8JCk5M_xrBs"
 RTSP_URL = "rtsp://username:password@ip:port/stream"
 WEBCAM_INDEX = 0
@@ -30,8 +30,8 @@ USE_GPU = True  # Set False if debugging CPU
 # ===============================
 
 SPEED_LIMIT = 60
-PIXEL_TO_METER = 0.02      # Adjust carefully (real-world calibration needed)
-MIN_PIXEL_MOVEMENT = 6     # Ignore jitter
+PIXEL_TO_METER = 0.009      # Adjust carefully (real-world calibration needed)
+MIN_PIXEL_MOVEMENT = 5     # Ignore jitter
 MAX_REASONABLE_SPEED = 150
 SPEED_SMOOTHING = 0.7      # 0.7 previous + 0.3 new
 
@@ -42,6 +42,14 @@ SPEED_SMOOTHING = 0.7      # 0.7 previous + 0.3 new
 JAM_SPEED_THRESHOLD = 10       # Vehicles considered slow below this
 JAM_VEHICLE_COUNT = 5          # Minimum slow vehicles
 JAM_TIME_THRESHOLD = 5         # Seconds of continuous slow traffic
+
+# ===============================
+# WRONG SIDE CONFIG
+# ===============================
+
+ENABLE_WRONG_SIDE = True
+ALLOWED_DIRECTION = "RIGHT"   # RIGHT or LEFT
+WRONG_SIDE_THRESHOLD = 5      # minimum pixel movement to consider
 
 # ===============================
 # DISPLAY
