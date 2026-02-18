@@ -1,300 +1,230 @@
-🚦 Vehicle Behavior Analysis System
+#  Vehicle Behavior Analysis & Intelligent Traffic Monitoring System  
 
-AI-Based Traffic Monitoring using YOLOv8 + OpenCV + PyTorch
 
-MTE Presentation(4th Semester) : [Click Here](https://docs.google.com/presentation/d/1o89KxDN3CUS8ysNKERa8RecxQSOQQMDO/edit?usp=sharing&ouid=117208834630367612571&rtpof=true&sd=true)
+##  Project Presentation
 
-📌 Project Overview
+🔗 PPT : [View Presentation](https://docs.google.com/presentation/d/1o89KxDN3CUS8ysNKERa8RecxQSOQQMDO/edit?slide=id.p1#slide=id.p1)
 
 
-Vehicle Behavior Analysis is an AI-powered real-time traffic monitoring system that:
+##  Overview
 
+This project implements a real-time intelligent traffic monitoring system using deep learning and computer vision.
 
-Detects vehicles and pedestrians
+Unlike traditional systems that only detect isolated violations, this system focuses on vehicle behaviour analysis to understand traffic flow and congestion patterns.
 
-Estimates vehicle speed
+The prototype supports:
 
-Detects over-speeding
+- Real-time vehicle detection  
+- Persistent ID tracking  
+- Speed estimation  
+- Congestion (Jam) detection  
+- Speed violation monitoring  
+- Vehicle counting  
+- Experimental wrong-side detection  
 
-Detects traffic congestion
+The system is designed with a modular architecture, GPU acceleration, and Smart City scalability in mind.
 
-Detects wrong-side driving
+---
 
-Counts vehicles in lanes
+##  System Architecture
 
-Supports Live CCTV / YouTube / RTSP / Local video
+Video Input  
+↓  
+Frame Preprocessing  
+↓  
+YOLOv8 Detection (GPU)  
+↓  
+Persistent Tracking  
+↓  
+Behaviour Analysis Engine  
+↓  
+Violation & Event Classification  
+↓  
+Visualization / Dashboard  
 
-Built using:
+---
 
-YOLOv8 (Ultralytics)
+##  Features Implemented
 
-OpenCV
+✔ Real-time vehicle detection using YOLOv8  
+✔ CUDA-based GPU acceleration  
+✔ Multi-source input support (Video / RTSP / YouTube / Webcam)  
+✔ Persistent vehicle ID tracking  
+✔ Real-time speed estimation (Pixel-to-Meter calibrated)  
+✔ Speed violation detection  
+✔ Intelligent jam detection (ratio + time threshold based)  
+✔ Vehicle counting per frame  
+✔ Frame skipping optimization  
+✔ Speed smoothing using Exponential Moving Average  
+✔ Modular and scalable project structure  
 
-PyTorch (CUDA GPU enabled)
+---
 
-Python 3.11
+##  Wrong-Side Detection (Experimental)
 
+The system includes a direction-based wrong-side detection module that:
 
+- Analyzes horizontal displacement (Δx) of tracked vehicles  
+- Compares movement with configured allowed road direction  
+- Flags opposite motion as potential violation  
 
-🎯 Problem Statement
+Current Status:
+- Works best when road direction is horizontally aligned  
+- May produce inaccurate results in diagonal or complex road layouts  
+- Currently under refinement for improved vector-based motion analysis  
 
+---
 
-Traditional traffic monitoring systems rely heavily on manual supervision.
+##  Speed Estimation Method
 
-This project provides:
+1. Track vehicle center movement across frames  
+2. Compute Euclidean pixel distance  
+3. Apply perspective compensation  
+4. Convert pixel → meter using calibration constant  
+5. Speed = Distance / Time  
+6. Apply exponential smoothing to reduce noise  
+7. Filter unrealistic speed spikes  
 
-Automated traffic rule violation detection
+---
 
-Real-time analytics
+##  Intelligent Jam Detection Logic
 
-Scalable AI-based monitoring system
+A traffic jam is confirmed only when:
 
-Foundation for Smart City Infrastructure
+- Majority of vehicles are moving below a defined speed threshold  
+- Minimum number of slow vehicles is present  
+- Condition persists for a defined time duration  
 
+This prevents false detection during:
+- Temporary slowdowns  
+- Traffic signal stops  
+- High-density but smooth traffic  
 
+---
 
-⚙️ Features Implemented (MTE Version)
+##  Accident Detection & SOS Alert (Future Enhancement)
 
+Future versions will include an Accident Detection Module designed to identify high-risk collision scenarios.
 
+Proposed Detection Criteria:
+- Sudden speed drop  
+- Vehicle immobilization in active lane  
+- Congestion forming behind stopped vehicle  
+- Bounding box overlap between vehicles  
 
-✅ Vehicle & Person Detection
+Planned integration includes:
+- SMS alerts (Twilio API)  
+- Email notifications  
+- API-based alerts to traffic authorities  
+- Location + timestamp reporting  
 
+Currently part of roadmap — not yet implemented.
 
-YOLOv8-based object detection
+---
 
-Real-time multi-object tracking
+##  Planned Behaviour-Based Enhancements
 
+Wrong Turn Detection  
+- Illegal turn identification  
+- Trajectory angle analysis  
 
+Rash Driving Detection  
+- Zig-zag motion patterns  
+- Aggressive acceleration/deceleration  
+- Abnormal lane switching detection  
 
-✅ Speed Estimation
+Pedestrian-Aware Congestion Analysis  
+- Integrate pedestrian density detection  
+- Differentiate between vehicle-induced jams and pedestrian-induced slowdowns  
+- Reduce false congestion alerts in mixed traffic environments  
 
+---
 
-Pixel-to-meter conversion
+##  Current Limitations
 
-Smoothed speed calculation
+- Pixel-to-meter calibration is approximate (manual calibration)  
+- Wrong-side detection depends on camera orientation  
+- No explicit collision classification model yet  
+- Jam detection is speed-based and may misclassify pedestrian-heavy areas  
+- Performance depends on lighting and camera positioning  
+- Wrong turn & rash driving detection not yet implemented  
 
-Over-speed detection
+---
 
+##  Technologies Used
 
+- Python 3.11  
+- YOLOv8 (Ultralytics)  
+- PyTorch + CUDA 12.1  
+- OpenCV  
+- NumPy  
+- Flask  
+- yt-dlp  
+- NVIDIA RTX 3050 GPU  
 
-✅ Traffic Jam Detection
+---
 
+##  Project Structure
 
-Detects slow-moving vehicle clusters
+Vehicle-Behavior-Analysis/  
+├── modules/  
+│   ├── detector.py  
+│   ├── tracker.py  
+│   ├── speed_estimator.py  
+│   ├── jam_detector.py  
+│   ├── vehicle_counter.py  
+│   ├── wrong_side_detector.py  
+├── config.py  
+├── main.py  
+├── requirements.txt  
+├── dashboard/  
+├── database/  
 
-Time-based congestion logic
+---
 
+##  How to Run
 
+1. Clone Repository  
+git clone https://github.com/AryanRajguru22/Vehicle-Behavior-Analysis.git  
+cd Vehicle-Behavior-Analysis  
 
-✅ Lane-Based Counting
+2. Install Dependencies  
+pip install -r requirements.txt  
 
+3. Configure Video Source  
+Edit config.py  
 
-Counts vehicles currently present in frame
+4. Run Application  
+python main.py  
 
-Top and bottom lane classification
+---
 
+##  Performance (GPU Mode)
 
+- FPS: ~28–35  
+- GPU Usage: ~40–50%  
+- CPU Usage: ~20–30%  
+- Stable real-time processing  
 
-✅ Wrong-Side Driving Detection
+---
 
+##  Industry Roadmap
 
-Direction-based motion tracking
+Phase 1 – Behaviour-Based Monitoring (Completed)  
+Phase 2 – Multi-lane Analysis  
+Phase 3 – Violation Intelligence (Wrong Turn & Rash Driving)  
+Phase 4 – Accident Detection & Emergency Alerts  
+Phase 5 – Smart City Deployment  
 
-Flags vehicles moving opposite to allowed direction
+---
 
+##  Author
 
+Aryan Rajguru  
+School of Computer Science & Engineering  
 
-✅ Multiple Input Sources
+---
 
+##  Project Vision
 
-Local Video
-
-YouTube Live Stream
-
-RTSP CCTV
-
-USB Webcam
-
-
-
-🧠 System Architecture
-
-
-Video Input
-
-→ YOLOv8 Detection
-
-→ Tracking
-
-→ Speed Estimation
-
-→ Jam Detection
-
-→ Wrong-Side Detection
-
-→ Frame Visualization
-
-
-
-🖥️ Hardware Used
-
-
-NVIDIA GeForce RTX 3050 6GB Laptop GPU
-
-CUDA 12.1 Enabled
-
-Python 3.11
-
-
-
-📂 Project Structure
-
-
-Vehicle-Behavior-Analysis/
-
-│
-
-├── modules/
-
-│   ├── detector.py
-
-│   ├── tracker.py
-
-│   ├── speed_estimator.py
-
-│   ├── jam_detector.py
-
-│   ├── vehicle_counter.py
-
-│   ├── wrong_side_detector.py
-
-│
-
-├── dashboard/
-
-├── database/
-
-├── data/
-
-│
-
-├── config.py
-
-├── main.py
-
-├── requirements.txt
-
-└── README.md
-
-
-
-🚀 How to Run
-
-
-1️⃣ Clone Repository
-
-
-git clone https://github.com/AryanRajguru22/Vehicle-Behavior-Analysis.git
-cd Vehicle-Behavior-Analysis
-
-
-
-2️⃣ Create Virtual Environment
-
-
-python -m venv venv
-
-venv\Scripts\activate
-
-
-
-3️⃣ Install Dependencies
-
-
-pip install -r requirements.txt
-
-
-
-4️⃣ Run Application
-
-
-python main.py
-
-
-
-🔧 Configuration
-
-
-Edit config.py to change:
-
-Video source type
-
-Speed limits
-
-Jam thresholds
-
-Model path
-
-Frame skip
-
-Allowed direction for wrong-side detection
-
-
-
-📊 Current Performance
-
-
-GPU Utilization: ~45%
-
-
-Real-time detection with frame skipping
-
-Optimized for 720p live streams
-
-
-
-📈 Future Scope (End-Term Vision)
-
-
-Automatic violation image capture
-
-ANPR (Number Plate Recognition)
-
-Database logging system
-
-Flask-based monitoring dashboard
-
-Deployment on edge devices
-
-Cloud integration
-
-REST API service
-
-Multi-camera scaling
-
-Docker containerization
-
-
-
-🏆 Academic Context
-
-
-Developed as part of:
-
-
-Problem Based Learning (PBL)
-Semester 4 – Mini Project Evaluation (MTE)
-
-
-
-👨‍💻 Author
-
-
-Aryan Rajguru
-
-B. Tech. Computer Science and Engineering
-
-
-GitHub:
-
-https://github.com/AryanRajguru22
+To evolve into a Smart City–ready Intelligent Traffic Management System capable of automated enforcement, emergency response, and data-driven traffic optimization.
